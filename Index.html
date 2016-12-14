@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flickr Search</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Flickr Search">
+    <link href="Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="Content/Style.css" rel="stylesheet" />
+    <link href="Content/JAPGallery.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <div class="search-result-container">
+            <header>
+                <h1>Flickr Search</h1>
+                <form class="form-search" action="/search" method="get" role="search">
+                    <input type="search" name="query" id="query" class="form-input" placeholder="Search photos ..." required />
+                    <button type="submit" value="Search" class="input-button">
+                        <span class="fa fa-search input-icon"></span>
+                    </button>
+                </form>
+                <button class="action-button show-gallery" disabled type="button">View Gallery</button>
+            </header>
+            <div class="search-loading">
+                <p>
+                    Loading ...
+                </p>
+            </div>
+            <div class="search-result">
+            </div>
+            <div class="search-actions">
+                <p style="display:none" class="empty-result-message">Oops! There are no matches.<br />Please try broadening your search.</p>
+                <a href="#" style="display:none" id="loadMorePhotos" value="View more ...">View more results ...</a>
+            </div>
+        </div>
+        <div class="jap-gallery">
+            <header>
+                <h1>Gallery</h1>
+                <button class="action-button show-search" type="button">View Search</button>  
+                <button class="action-button new-search" type="button">New Search</button>  
+            </header>
+            <div class="gallery-item-container">
+            </div>
+            <div class="photo-show-container">
+                <div class="photo-show">
+                    <img  class="photo-show-item"/>
+                    <button class="action-button close-photo-show" type="button" title="Close"><span class="fa fa-close"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="Scripts/Utility.js"></script>
+    <script src="Scripts/FlickrServices.js"></script>
+    <script src="Scripts/FlickrPhoto.js"></script>
+    <script src="Scripts/JAPGallery.js"></script>
+    <script>
+        (function (document, window) {
+
+            function Init() {
+                document.getElementsByClassName('form-search')[0].addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    clearTimeout(searchTimer);
+                    var searchQuery = document.getElementById('query').value;
+                    if (searchQuery.length > 0) {
+                        Photos.loadPhotos(searchQuery);
+                    }
+                });
+                var searchTimer;
+                document.getElementById('query').addEventListener("keyup", function (event) {
+                    clearTimeout(searchTimer);
+                    var searchQuery = document.getElementById('query').value;
+                    if (searchQuery.length > 3) {
+                        searchTimer = setTimeout(function () { Photos.loadPhotos(searchQuery); }, 1000);
+                    }
+                });
+
+                document.getElementById('loadMorePhotos').addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var searchQuery = document.getElementById('query').value;
+                    Photos.loadMorePhotos(searchQuery);
+                });
+
+                document.getElementsByClassName('show-gallery')[0].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    Photos.showGallery();
+                });
+                document.getElementsByClassName('show-search')[0].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    JAPGallery.closeGallery();
+                });
+                document.getElementsByClassName('new-search')[0].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    clearTimeout(searchTimer);
+                    JAPGallery.closeGallery();
+                    Photos.newSearch();
+                    document.getElementById('query').value = "";
+                });
+                document.getElementsByClassName('close-photo-show')[0].addEventListener('click', function (event) {
+                    event.preventDefault();
+                    JAPGallery.closePhoto();
+                });
+            };
+            window.FlickerSearch = Utility.extend(window.FlickerSearch || {}, {
+                Init : Init
+            });
+        })(document, window);
+
+        FlickerSearch.Init();
+    </script>
+</body>
+</html>
